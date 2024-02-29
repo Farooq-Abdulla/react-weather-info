@@ -22,7 +22,7 @@ export default function SearchBox() {
     wind_speed: 0,
     weather: "",
   });
-  let apiUrl = "http://api.openweathermap.org/data/2.5/weather";
+  let apiUrl = "https://api.openweathermap.org/data/2.5/weather";
   let apiKey = "185618962fbcebef13bd54ea3f953bd1";
   let limit = 1;
 
