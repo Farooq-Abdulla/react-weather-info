@@ -2,7 +2,7 @@
   "name": "react-mini-project",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://gitname.github.io/react-gh-pages",
+  "homepage": "https://Farooq-Abdulla.github.io/react-weather-info",
   "type": "module",
   "scripts": {
     "predeploy": "npm run build",
