@@ -32,7 +32,7 @@ export default function SearchBox() {
         `${apiUrl}?q=${searchInput}&limit=${limit}&appid=${apiKey}&units=imperial`
       );
       let jsonResponse = await response.json();
-      // console.log(jsonResponse);
+      console.log(jsonResponse);
       let result = {
         city: jsonResponse.name,
         temp: jsonResponse.main.temp,
@@ -71,19 +71,51 @@ export default function SearchBox() {
   };
   useEffect(() => {
     if (searchInput == "") {
-      setWeatherData({
-        city: "London",
-        temp: 50,
-        feels_like: 42,
-        temp_min: 35,
-        temp_max: 53,
-        pressure: 1008,
-        humidity: 23,
-        wind_speed: 20.16,
-        weather: "Looks Cloudy",
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        let lat = position.coords.latitude;
+        let lon = position.coords.longitude;
+        let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`;
+        let response = await fetch(url);
+        let jsonResponse = await response.json();
+        setWeatherData({
+          city: jsonResponse.name,
+          temp: jsonResponse.main.temp,
+          feels_like: jsonResponse.main.feels_like,
+          temp_min: jsonResponse.main.temp_min,
+          temp_max: jsonResponse.main.temp_max,
+          humidity: jsonResponse.main.humidity,
+          pressure: jsonResponse.main.pressure,
+          wind_speed: jsonResponse.wind.speed,
+          weather: jsonResponse.weather[0].description,
+        });
       });
+
+      // city: "London",
+      //   temp: 50,
+      //   feels_like: 42,
+      //   temp_min: 35,
+      //   temp_max: 53,
+      //   pressure: 1008,
+      //   humidity: 23,
+      //   wind_speed: 20.16,
+      //   weather: "Looks Cloudy",
     }
   }, []);
+
+  let getUnsplashImage = async (weatherDescription) => {
+    try {
+      let response = await fetch(
+        `https://api.unsplash.com/search/photos?page=1&query=${weatherDescription}&client_id=HyDoQnk98mVMBKbUDrbEdO-3J9DWElLBbyi4j5EmfvU`
+      );
+      let jsonResponse = await response.json();
+      let imageURL = jsonResponse.results[0].urls.regular;
+      return imageURL;
+    } catch (error) {
+      throw error;
+    }
+  };
+  // getUnsplashImage(weatherData.weather);
+
   let Cold_URL =
     "https://images.unsplash.com/photo-1514632595-4944383f2737?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
   let Hot_URL =
@@ -120,11 +152,12 @@ export default function SearchBox() {
         <CardMedia
           sx={{ height: 140 }}
           image={
-            weatherData.humidity > 90
-              ? Rain_URL
-              : weatherData.temp < 40
-              ? Cold_URL
-              : Hot_URL
+            getUnsplashImage(weatherData.weather)
+            // weatherData.humidity > 90
+            //   ? Rain_URL
+            //   : weatherData.temp < 40
+            //   ? Cold_URL
+            //   : Hot_URL
           }
           title="Weather Icon"
         />
