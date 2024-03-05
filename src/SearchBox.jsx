@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 
 export default function SearchBox() {
   let [searchInput, setSearchInput] = useState("");
+  let [imageUrl, setImageUrl] = useState("");
   let [error, setError] = useState(false);
 
   let [weatherData, setWeatherData] = useState({
@@ -69,6 +70,34 @@ export default function SearchBox() {
       setError(true);
     }
   };
+
+  let getUnsplashImage = async (weatherDescription) => {
+    try {
+      let response = await fetch(
+        `https://api.unsplash.com/search/photos?page=1&query=${weatherDescription}&client_id=HyDoQnk98mVMBKbUDrbEdO-3J9DWElLBbyi4j5EmfvU`
+      );
+      let jsonResponse = await response.json();
+      let imageURL = jsonResponse.results[0].urls.regular;
+
+      return imageURL;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    const fetchImageUrl = async () => {
+      try {
+        const imageUrl = await getUnsplashImage(weatherData.weather);
+        console.log(imageUrl);
+        setImageUrl(imageUrl);
+      } catch (error) {
+        console.error("Error fetching image:", error);
+      }
+    };
+    fetchImageUrl();
+  }, [weatherData.weather]);
+
   useEffect(() => {
     if (searchInput == "") {
       navigator.geolocation.getCurrentPosition(async (position) => {
@@ -102,19 +131,9 @@ export default function SearchBox() {
     }
   }, []);
 
-  let getUnsplashImage = async (weatherDescription) => {
-    try {
-      let response = await fetch(
-        `https://api.unsplash.com/search/photos?page=1&query=${weatherDescription}&client_id=HyDoQnk98mVMBKbUDrbEdO-3J9DWElLBbyi4j5EmfvU`
-      );
-      let jsonResponse = await response.json();
-      let imageURL = jsonResponse.results[0].urls.regular;
-      return imageURL;
-    } catch (error) {
-      throw error;
-    }
-  };
-  // getUnsplashImage(weatherData.weather);
+  // getUnsplashImage(weatherData.weather).then((url) => {
+  //   console.log(url);
+  // });
 
   let Cold_URL =
     "https://images.unsplash.com/photo-1514632595-4944383f2737?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
@@ -144,6 +163,7 @@ export default function SearchBox() {
         {error && (
           <p style={{ color: "red" }}>No such place exists in our API</p>
         )}
+        {error && setError(false)}
       </form>
 
       <br />
@@ -152,7 +172,8 @@ export default function SearchBox() {
         <CardMedia
           sx={{ height: 140 }}
           image={
-            getUnsplashImage(weatherData.weather)
+            // Url
+            imageUrl
             // weatherData.humidity > 90
             //   ? Rain_URL
             //   : weatherData.temp < 40
